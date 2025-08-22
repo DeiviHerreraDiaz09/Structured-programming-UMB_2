@@ -1,43 +1,69 @@
 import java.nio.charset.StandardCharsets;
 import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
+import java.util.LinkedHashMap;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.Arrays;
+import java.io.Writer;
+import java.util.Map;
+
 import Class.EmployeeA;
 import Class.EmployeeC;
-import java.io.Writer;
 
 public class App {
 
-    private static final String FILE_ASALARIADOS = "asalariados.txt";
-    private static final String FILE_COMISION = "comision.txt";
+    private static final String FILE_ASALARIADOS = "Docs/asalariados.txt";
+    private static final String FILE_COMISION = "Docs/comision.txt";
 
     public static void main(String[] args) throws Exception {
+
+        Files.createDirectories(Paths.get("Docs"));
+        Map<String, Boolean> files = new LinkedHashMap<>();
+        files.put(FILE_ASALARIADOS, false);
+        files.put(FILE_COMISION, false);
+
         try (Scanner scanner = new Scanner(System.in)) {
             System.out.println("Bienvenido al sistema de cálculo de sueldos de empleados.");
 
             // Employee A
             System.out.print("Ingrese la cantidad de empleados asalariados: ");
-            int employeeACount = scanner.nextInt();
-            float[] salariesA = new float[employeeACount];
-            procesarAsalariados(scanner, salariesA);
+            if (!scanner.hasNextInt()) {
+                System.out.println("Error: Debe ingresar un número entero.");
+                scanner.next();
+            } else {
+                int employeeACount = scanner.nextInt();
+                if (employeeACount >= 1) {
+                    float[] salariesA = new float[employeeACount];
+                    processSalariedEmployees(scanner, salariesA);
+                    files.put(FILE_ASALARIADOS, true);
+                }
+            }
 
             // Employee C
             System.out.print("Ingrese la cantidad de empleados por comisión: ");
-            int employeeCCount = scanner.nextInt();
-            float[] salariesC = new float[employeeCCount];
-            procesarComision(scanner, salariesC);
+            if (!scanner.hasNextInt()) {
+                System.out.println("Error: Debe ingresar un número entero.");
+            } else {
+                int employeeCCount = scanner.nextInt();
+                if (employeeCCount >= 1) {
+                    float[] salariesC = new float[employeeCCount];
+                    processCommissionEmployees(scanner, salariesC);
+                    files.put(FILE_COMISION, true);
+                }
+            }
 
-            mostrarArchivo(FILE_ASALARIADOS);
-            mostrarArchivo(FILE_COMISION);
+            files.forEach((file, created) -> {
+                if (created)
+                    showFile(file);
+            });
         }
     }
 
-    private static void procesarAsalariados(Scanner scanner, float[] salariesA) {
+    private static void processSalariedEmployees(Scanner scanner, float[] salariesA) {
         System.out.println("Ingrese el sueldo fijo para los empleados asalariados: ");
         float fixedSalary = scanner.nextFloat();
         Arrays.fill(salariesA, fixedSalary);
@@ -54,7 +80,7 @@ public class App {
         }
     }
 
-    private static void procesarComision(Scanner scanner, float[] salariesC) {
+    private static void processCommissionEmployees(Scanner scanner, float[] salariesC) {
         System.out.println("Ingrese el sueldo base para los empleados por comisión: ");
         float baseSalary = scanner.nextFloat();
         Arrays.fill(salariesC, baseSalary);
@@ -74,7 +100,7 @@ public class App {
         }
     }
 
-    private static void mostrarArchivo(String filename) {
+    private static void showFile(String filename) {
         try {
             Files.lines(Paths.get(filename), StandardCharsets.UTF_8).forEach(System.out::println);
         } catch (IOException e) {
