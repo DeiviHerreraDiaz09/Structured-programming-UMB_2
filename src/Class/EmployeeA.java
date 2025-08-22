@@ -4,9 +4,9 @@ import java.io.Writer;
 
 public class EmployeeA extends Employee {
 
-    float healthDiscount = 0;
-    float pensionDiscount = 0;
-    float totalDiscounts = 0;
+    private float healthDiscount = 0;
+    private float pensionDiscount = 0;
+    private float totalDiscounts = 0;
 
     public EmployeeA(int id, float salary) {
         super(id, salary);
