@@ -2,11 +2,11 @@ import java.nio.charset.StandardCharsets;
 import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
 import java.io.BufferedWriter;
-import java.math.BigDecimal;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
+import Class.EmployeeA;
 import java.util.Arrays;
 import java.io.Writer;
 
@@ -16,12 +16,6 @@ public class App {
         Scanner scanner = new Scanner(System.in);
         int EmployeeA = 0;
         int EmployeeC = 0;
-
-        float alimentacionSubsidy = 100000f;
-        float transportSubsidy = 150000f;
-
-        BigDecimal healthDiscountRate = new BigDecimal("0.04");
-        BigDecimal pensionDiscountRate = new BigDecimal("0.04");
 
         System.out.println("Bienvenido al sistema de cálculo de sueldos de empleados.");
 
@@ -36,26 +30,11 @@ public class App {
 
         try (Writer writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream("asalariados.txt"), StandardCharsets.UTF_8))) {
-
             writer.write("========== NÓMINA EMPLEADOS ASALARIADOS ==========\n\n");
             for (int i = 0; i < salariesA.length; i++) {
-                float healthDiscount = fixedSalary * healthDiscountRate.floatValue();
-                float pensionDiscount = fixedSalary * pensionDiscountRate.floatValue();
-                float totalDiscounts = healthDiscount + pensionDiscount;
-                float totalSalary = fixedSalary - totalDiscounts + alimentacionSubsidy + transportSubsidy;
-                salariesA[i] = totalSalary;
-
-                writer.write("Empleado #" + (i + 1) + "\n");
-                writer.write("----------------------------------------\n");
-                writer.write(String.format("Sueldo Base:              $%,.2f%n", fixedSalary));
-                writer.write(String.format("Descuento Salud (4%%):     $%,.2f%n", healthDiscount));
-                writer.write(String.format("Descuento Pensión (4%%):   $%,.2f%n", pensionDiscount));
-                writer.write(String.format("Total Descuentos:         $%,.2f%n", totalDiscounts));
-                writer.write(String.format("Subsidio Alimentación:    $%,.2f%n", alimentacionSubsidy));
-                writer.write(String.format("Subsidio Transporte:      $%,.2f%n", transportSubsidy));
-                writer.write("----------------------------------------\n");
-                writer.write(String.format("Sueldo Neto:            $%,.2f%n", totalSalary));
-                writer.write("========================================\n\n");
+                EmployeeA employeeA = new EmployeeA(i, fixedSalary);
+                employeeA.calculateTotalSalary();
+                employeeA.billingDetails(writer);
             }
         } catch (IOException e) {
             System.out.println("Error al escribir el archivo asalariados.txt: " + e.getMessage());
