@@ -16,8 +16,9 @@ import Class.EmployeeC;
 
 public class App {
 
-    private static final String FILE_ASALARIADOS = "Docs/asalariados.txt";
-    private static final String FILE_COMISION = "Docs/comision.txt";
+    //Environment variables
+    private static final String FILE_ASALARIADOS = (System.getenv("FILE_ASALARIADOS") != null && !System.getenv("FILE_ASALARIADOS").isEmpty() ? System.getenv("FILE_ASALARIADOS") : "Docs/asalariados.txt");
+    private static final String FILE_COMISION = (System.getenv("FILE_COMISION") != null && !System.getenv("FILE_COMISION").isEmpty() ? System.getenv("FILE_COMISION") : "Docs/comision.txt");
 
     public static void main(String[] args) throws Exception {
 
