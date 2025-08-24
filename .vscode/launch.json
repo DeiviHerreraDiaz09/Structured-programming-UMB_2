@@ -5,7 +5,15 @@
             "name": "App",
             "request": "launch",
             "mainClass": "App",
-            "projectName": "umb2_33cb6e00"
+            "projectName": "umb2_33cb6e00",
+            "env":{
+                "FILE_ASALARIADOS": "Docs/asalariados.txt",
+                "FILE_COMISION": "Docs/comision.txt",
+                "ALIMENTACION_SUBSIDY":"100000.0F",
+                "TRANSPORT_SUBSIDY": "150000.0F",
+                "HEALTH_DISCOUNT_RATE":"0.04",
+                "PENSION_DISCOUNT_RATE":"0.04"
+            }
         }
     ]
 }
