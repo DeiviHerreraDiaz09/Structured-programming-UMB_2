@@ -1,71 +1,86 @@
 import java.nio.charset.StandardCharsets;
 import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
+import java.util.LinkedHashMap;
 import java.io.BufferedWriter;
-import java.math.BigDecimal;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.Arrays;
 import java.io.Writer;
+import java.util.Map;
+
+import Class.EmployeeA;
+import Class.EmployeeC;
 
 public class App {
+
+    private static final String FILE_ASALARIADOS = "Docs/asalariados.txt";
+    private static final String FILE_COMISION = "Docs/comision.txt";
+
     public static void main(String[] args) throws Exception {
 
-        Scanner scanner = new Scanner(System.in);
-        int EmployeeA = 0;
-        int EmployeeC = 0;
+        Files.createDirectories(Paths.get("Docs"));
+        Map<String, Boolean> files = new LinkedHashMap<>();
+        files.put(FILE_ASALARIADOS, false);
+        files.put(FILE_COMISION, false);
 
-        float alimentacionSubsidy = 100000f;
-        float transportSubsidy = 150000f;
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.println("Bienvenido al sistema de cálculo de sueldos de empleados.");
 
-        BigDecimal healthDiscountRate = new BigDecimal("0.04");
-        BigDecimal pensionDiscountRate = new BigDecimal("0.04");
+            // Employee A
+            System.out.print("Ingrese la cantidad de empleados asalariados: ");
+            if (!scanner.hasNextInt()) {
+                System.out.println("Error: Debe ingresar un número entero.");
+                scanner.next();
+            } else {
+                int employeeACount = scanner.nextInt();
+                if (employeeACount >= 1) {
+                    float[] salariesA = new float[employeeACount];
+                    processSalariedEmployees(scanner, salariesA);
+                    files.put(FILE_ASALARIADOS, true);
+                }
+            }
 
-        System.out.println("Bienvenido al sistema de cálculo de sueldos de empleados.");
+            // Employee C
+            System.out.print("Ingrese la cantidad de empleados por comisión: ");
+            if (!scanner.hasNextInt()) {
+                System.out.println("Error: Debe ingresar un número entero.");
+            } else {
+                int employeeCCount = scanner.nextInt();
+                if (employeeCCount >= 1) {
+                    float[] salariesC = new float[employeeCCount];
+                    processCommissionEmployees(scanner, salariesC);
+                    files.put(FILE_COMISION, true);
+                }
+            }
 
-        // Employees A
-        System.out.print("Ingrese la cantidad de empleados asalariados: ");
-        EmployeeA = scanner.nextInt();
-        float[] salariesA = new float[EmployeeA];
+            files.forEach((file, created) -> {
+                if (created)
+                    showFile(file);
+            });
+        }
+    }
 
+    private static void processSalariedEmployees(Scanner scanner, float[] salariesA) {
         System.out.println("Ingrese el sueldo fijo para los empleados asalariados: ");
         float fixedSalary = scanner.nextFloat();
         Arrays.fill(salariesA, fixedSalary);
 
         try (Writer writer = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream("asalariados.txt"), StandardCharsets.UTF_8))) {
-
+                new OutputStreamWriter(new FileOutputStream(FILE_ASALARIADOS), StandardCharsets.UTF_8))) {
             writer.write("========== NÓMINA EMPLEADOS ASALARIADOS ==========\n\n");
             for (int i = 0; i < salariesA.length; i++) {
-                float healthDiscount = fixedSalary * healthDiscountRate.floatValue();
-                float pensionDiscount = fixedSalary * pensionDiscountRate.floatValue();
-                float totalDiscounts = healthDiscount + pensionDiscount;
-                float totalSalary = fixedSalary - totalDiscounts + alimentacionSubsidy + transportSubsidy;
-                salariesA[i] = totalSalary;
-
-                writer.write("Empleado #" + (i + 1) + "\n");
-                writer.write("----------------------------------------\n");
-                writer.write(String.format("Sueldo Base:              $%,.2f%n", fixedSalary));
-                writer.write(String.format("Descuento Salud (4%%):     $%,.2f%n", healthDiscount));
-                writer.write(String.format("Descuento Pensión (4%%):   $%,.2f%n", pensionDiscount));
-                writer.write(String.format("Total Descuentos:         $%,.2f%n", totalDiscounts));
-                writer.write(String.format("Subsidio Alimentación:    $%,.2f%n", alimentacionSubsidy));
-                writer.write(String.format("Subsidio Transporte:      $%,.2f%n", transportSubsidy));
-                writer.write("----------------------------------------\n");
-                writer.write(String.format("Sueldo Neto:            $%,.2f%n", totalSalary));
-                writer.write("========================================\n\n");
+                EmployeeA employeeA = new EmployeeA(i, fixedSalary);
+                employeeA.billingDetails(writer);
             }
         } catch (IOException e) {
-            System.out.println("Error al escribir el archivo asalariados.txt: " + e.getMessage());
+            System.out.println("Error al escribir el archivo " + FILE_ASALARIADOS + ": " + e.getMessage());
         }
+    }
 
-        // Employees C
-        System.out.println("Ingrese la cantidad de empleados por comisión: ");
-        EmployeeC = scanner.nextInt();
-        float[] salariesC = new float[EmployeeC];
-
+    private static void processCommissionEmployees(Scanner scanner, float[] salariesC) {
         System.out.println("Ingrese el sueldo base para los empleados por comisión: ");
         float baseSalary = scanner.nextFloat();
         Arrays.fill(salariesC, baseSalary);
@@ -74,29 +89,23 @@ public class App {
         float totalSales = scanner.nextFloat();
 
         try (Writer writer = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream("comision.txt"), StandardCharsets.UTF_8))) {
-
+                new OutputStreamWriter(new FileOutputStream(FILE_COMISION), StandardCharsets.UTF_8))) {
             writer.write("========== NÓMINA EMPLEADOS POR COMISIÓN ==========\n\n");
             for (int i = 0; i < salariesC.length; i++) {
-                float commission = totalSales * 0.2f;
-                salariesC[i] = baseSalary + commission;
-
-                writer.write("Empleado #" + (i + 1) + "\n");
-                writer.write("----------------------------------------\n");
-                writer.write(String.format("Sueldo Base:          $%,.2f%n", baseSalary));
-                writer.write(String.format("Ventas Totales:       $%,.2f%n", totalSales));
-                writer.write(String.format("Comisión (20%%):       $%,.2f%n", commission));
-                writer.write("----------------------------------------\n");
-                writer.write(String.format("Sueldo Neto:        $%,.2f%n", salariesC[i]));
-                writer.write("========================================\n\n");
+                EmployeeC employeeC = new EmployeeC(i, baseSalary, totalSales);
+                employeeC.billingDetails(writer);
             }
         } catch (IOException e) {
-            System.out.println("Error al escribir el archivo comision.txt: " + e.getMessage());
+            System.out.println("Error al escribir el archivo " + FILE_COMISION + ": " + e.getMessage());
         }
-
-        Files.lines(Paths.get("asalariados.txt"), StandardCharsets.UTF_8).forEach(System.out::println);
-        Files.lines(Paths.get("comision.txt"), StandardCharsets.UTF_8).forEach(System.out::println);
-
-        scanner.close();
     }
+
+    private static void showFile(String filename) {
+        try {
+            Files.lines(Paths.get(filename), StandardCharsets.UTF_8).forEach(System.out::println);
+        } catch (IOException e) {
+            System.out.println("Error al leer el archivo " + filename + ": " + e.getMessage());
+        }
+    }
+
 }
